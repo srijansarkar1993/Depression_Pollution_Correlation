@@ -1,5 +1,6 @@
 var selectedRegion = "Asia";
 
+
 //Extracting the PollutionDepression main data
 d3.csv("data/Depression_Pollution_Data.csv", d => {
 
@@ -24,6 +25,7 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     year: 2023
   }
 }).then(csvData => {
+  countryDataforMap = csvData;
   mainCsvData = csvData.filter(data => data.region == selectedRegion);
 
   //getting the unique regions from the data
@@ -50,7 +52,6 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
   })
 
   d3.select("#filterRegion").on("change", function (d) {
-    //console.log(selectedRegion)
     // recover the region that has been chosen
     selectedOption = d3.select(this).property("value");
     selectedRegion = selectedOption;
@@ -61,6 +62,70 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
 
 })
 
+//creating worldmap
+
+// Define the map projection
+var projection = d3.geoNaturalEarth1()
+  .scale(153)
+  .translate([300, 200]);
+
+// Define the path generator
+var path = d3.geoPath().projection(projection);
+
+//Load the world map TopoJSON data
+d3.json("data/countries.geojson").then(function (world) {
+  // Convert TopoJSON to GeoJSON (for D3.js)
+  // var countries = topojson.feature(world, world.objects.countries).features;
+
+  // Create the map
+  var map = d3.select("#mapcontainer")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%");
+
+  // Draw the countries on the map
+  map.selectAll("path")
+    .data(world.features)
+    .enter().append("path")
+    .attr("d", path)
+    // .attr("id", function (d, i) {
+    //   return "country" + d.properties.ADMIN;
+    // })
+    .style("fill", "#ccc")
+    .style("stroke", "#fff")
+    .style("stroke-width", "1.5");
+
+  // Add interactivity to the map
+  map.selectAll("path")
+    .on("mouseover", function () {
+      d3.select(this).style("fill", "orange");
+    })
+    .on("mouseout", function () {
+      d3.select(this).style("fill", "#ccc");
+    })
+    .on("click", function (d, i) {
+      var clickedCountry = i.properties.ADMIN == "United States of America" ? "United States" : i.properties.ADMIN;
+      //checking if the clicked country exists in our csv data
+      var result = countryDataforMap.find(d => d.countryName == clickedCountry);
+      if(result !== undefined){
+        //if the clicked country exists take its region
+        var clickedRegion = result.region;
+        //setting the global variable with this region
+        selectedRegion = clickedRegion;
+        let regionDropdown = d3.select("#filterRegion");
+        regionDropdown.property("value", selectedRegion)
+        .dispatch("change");
+      }
+      
+      // recover the region that has been chosen
+      // selectedOption = d3.select(this).property("value");
+      // selectedRegion = selectedOption;
+      // // filter the countries data with this selected region
+      // mainCsvData = csvData.filter(data => data.region == selectedRegion);
+      // createStackedBars(stackBarData, mainCsvData);
+
+    });
+});
 
 function createStackedBars(data, mainCsvData) {
 
@@ -113,10 +178,10 @@ function createStackedBars(data, mainCsvData) {
   // Create the color scales for depression and pollution based on area and density
   var depressionColor = d3.scaleLinear()
     .domain([d3.min(mainCsvData, d => +d.depressionPrevalence), d3.max(mainCsvData, d => +d.depressionPrevalence)])
-    .range(["#CBC3E3", "#301934"]);
+    .range(["#D85A88", "#2F121C"]);
   var pollutionColor = d3.scaleLinear()
     .domain([d3.min(mainCsvData, d => +d.particlePollution), d3.max(mainCsvData, d => +d.particlePollution)])
-    .range(["#90EE90", "#023020"]);
+    .range(["#4861AC", "#0C1331"]);
 
 
   //stack the data --> stack per subgroup

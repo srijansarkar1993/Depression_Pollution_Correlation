@@ -1,34 +1,105 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Depression and Air Pollution Correlation</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
-<body>
-	<div class="responsive-svg-container" id="form">
-		<!-- <label for="yearSlider">Year</label>
-		<input id="yearSlider" type="range" value="2020" min="2010" max="2020" oninput="yearText.value=yearSlider.value" />
-		<input id="yearText" type="number" value="2020" min="2010" max="2020" oninput="yearSlider.value=yearText.value" disabled />
 
-		<label for="sort">Sort By</label>
-		<select name="sort" id="sort">
-			<option value="area">LandAreaKm</option>
-			<option value="alphabet">Alphabetical</option>
-			<option value="sortDesc">Percentage of pay gap, descending</option> -->
-		<!-- </select> -->
-
+<body class="body">
+	<!-- <div class="responsive-svg-container" id="form">
 		<label for="filter">Select Region</label>
-		<select name="filterRegion" id="filterRegion">
-		</select>
+		<select name="filterRegion" id="filterRegion"></select>
+	</div> -->
+
+	<nav id="navigation" class="navbar navbar-expand-lg">
+		<a class="navbar-brand" href="#">MoodForecast </a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+			aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav mr-auto">
+
+				<!-- <li class="nav-item">
+				<a class="nav-link" href="#year">Year</a>
+				<input class ="yearSlider" id="yearSlider" type="range" value="2020" min="2010" max="2020" oninput="yearText.value=yearSlider.value" />
+				<input class = "yearText" id="yearText" type="number" value="2020" min="2010" max="2020" oninput="yearSlider.value=yearText.value" />
+			</li> -->
+				<li class="nav-item">
+					<a class="nav-link" href="#sort">Sort By Region</a>
+					<select name="filterRegion" id="filterRegion"></select>
+				</li>
+
+				<li class="nav-item">
+					<a class="nav-link" href="#infoRow">About This Site</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+
+	<div id="about" class="section">
+		<div class="container">
+			<div class="row" id="titleRow">
+				<h2>Global Depression Prevalence in relation with Particle Pollution for 2023 </h2>
+			</div>
+			<div class="row" id="visualizationRow">
+				<div class="col-md-10">
+					<!-- <div id="map" class="responsive-svg-container">
+						<img src="img/mapimg.png" class="img-fluid" alt="Responsive image">
+					</div> -->
+					<div id="mapcontainer" class="responsive-svg-container" style="position: relative; width: 600px; height: 400px;"></div>
+					<div id="bar" class="responsive-svg-container"></div>
+					<div id="legend" class="responsive-svg-container">
+						<img src="img/gradient-bar-legend.png" class="img-fluid" alt="Responsive image">
+					</div>
+				</div>
+				<div class="col-md-2">
+					<!-- <fieldset>
+						<legend style="float:right">Legend</legend>
+						<img class="legendImg" src="img/legendimg.png"><br>
+					  </fieldset> -->
+					<div id="info">
+						<h3 class="sections"> How to Interact?</h3>
+						<p>The visualization shows the correlation between air pollution and depression ratio
+							across a continent. This visualization is targeted for anyone interested in this topic.</p>
+
+					</div>
+				</div>
+			</div>
+			<div class="row" id="infoRow">
+				<div class="col-md-12">
+					<h2 class="subheading">About This Site</h2>
+					<h3 class="sections"> What is it and who is it for?</h3>
+					<p>The visualization shows the correlation between air pollution and depression ratio
+						across a continent. This visualization is targeted for anyone interested in this topic.</p>
+					<h3 class="sections"> Why is it important?</h3>
+					<p>The relationship between air pollution and mental health is a growing area of concern and could
+						have significant implications for public health.
+						Understanding the relationship between air pollution and depression is important for improving
+						public health, reducing the burden of mental illness, and ultimately improving quality of life
+						for individuals and communities affected by air pollution.</p>
+					<h3 class="sections"> How do you look at it?</h3>
+					<p>The top part visualize the severity of air pollution, while the bottom part visualize
+						the severity if depression in a particular country.The position of the red dots visualize the
+						correlation
+						between air pollution and depression. </p>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div id="bar" class="responsive-svg-container"></div>
-	<div id="line"class="responsive-svg-container"></div>
-	<!-- <div id="map" style="width:960px; height:600px;"></div> -->
 
 	<script src="https://d3js.org/d3.v7.min.js"></script>
 	<!-- <script src="https://d3js.org/d3-queue.v2.min.js"></script> -->
 	<script src="js/main.js"></script>
+	<!-- TopoJSON library for converting TopoJSON to GeoJSON -->
+    <script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+
 </body>
+
 </html>
