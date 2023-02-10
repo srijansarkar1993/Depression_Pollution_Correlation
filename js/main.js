@@ -11,7 +11,7 @@ d3.csv("data/data.csv", d => {
     date: parseTime(d.year)
   }
 }).then(data => {
-  // We need to make sure that the data are sorted correctly by country and then by year
+  // We need to make sure that the data are sorted correctly by country and then by year.
   data = data.sort((a, b) => d3.ascending(a.country, b.country) || d3.ascending(a.year, b.year));
 
   // Define the color scale for countries
