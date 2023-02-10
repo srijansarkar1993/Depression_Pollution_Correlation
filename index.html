@@ -1,28 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Gender Pay Gap | D3.js Tutorial</title>
-	<link rel="stylesheet" type="text/css" href="css/main.css">
+<meta charset="utf-8">
+<style>
+  * {
+    font-family: "Helvetica Neue";
+  }
+  p {
+    font-size: 0.85em;
+  }
+</style>
+   <title>Pollution affecting depression - Visualization project</title>
+   <p> Pollution affecting depression - Visualization project </p>
+   <script src="https://d3js.org/d3.v7.min.js"></script>
+
 </head>
 <body>
-	<div class="responsive-svg-container" id="form">
-		<label for="yearSlider">Year</label>
-		<input id="yearSlider" type="range" value="2020" min="2010" max="2020" oninput="yearText.value=yearSlider.value" />
-		<input id="yearText" type="number" value="2020" min="2010" max="2020" oninput="yearSlider.value=yearText.value" disabled />
-
-		<label for="sort">Sort By</label>
-		<select name="sort" id="sort">
-			<option value="alphabet">Alphabetical</option>
-			<option value="sortAsce">Percentage of pay gap, ascending</option>
-			<option value="sortDesc">Percentage of pay gap, descending</option>
-		</select>
-	</div>
-	<div id="bar" class="responsive-svg-container"></div>
-	<div id="line"class="responsive-svg-container"></div>
-
-	<script src="https://d3js.org/d3.v7.min.js"></script>
-	<script src="js/main.js"></script>
+   <script src="visualization.js"></script>
 </body>
 </html>
