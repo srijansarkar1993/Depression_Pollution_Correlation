@@ -26,6 +26,7 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     year: 2023
   }
 }).then(csvData => {
+  console.log((d3.max(csvData, d => +d.pollutionDepressionRatio)).toFixed(0));
   countryDataforMap = csvData;
   mainCsvData = csvData.filter(data => data.region == selectedRegion);
 
@@ -186,12 +187,27 @@ function createStackedBars(data, mainCsvData) {
       }
     });
 
+  //Add x-axis label
+  svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom)
+    .text("Countries");
+
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain([0, 4.0])
+    .domain([0, 20])
     .range([height, 0]);
   svg.append("g")
     .call(d3.axisLeft(y));
+
+  // Add y-axis label
+  svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "translate(" + (-margin.left / 2) + "," + (height / 2) + ")rotate(-90)")
+    .text("Particle Pollution to Depression Prevalence ratio")
+    .style("font-size", "14px")
+    .attr("y", 10);
 
   // Create the color scales for depression and pollution based on area and density
   var depressionColor = d3.scaleLinear()
@@ -240,7 +256,6 @@ function createStackedBars(data, mainCsvData) {
   }
 
   var mousemove = function (d) {
-    //console.log(d3.pointer(d));
     tooltip
       .style("left", (d3.pointer(d)[0] + 50) + "px")
       .style("top", (d3.pointer(d)[1] + 350) + "px")
@@ -250,17 +265,15 @@ function createStackedBars(data, mainCsvData) {
       .style("opacity", 0)
   }
 
-  // create stacked bars
+  // ----------------
+  // Create stacked bars
+  // ----------------
   let bars = svg.append("g")
     .selectAll("g")
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
     .enter().append("g")
     .selectAll("rect")
-    .style("fill", function (d, i) {
-
-      console.log(countrySelectedonMap);
-    })
     // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(function (d, i) {
       return d;
@@ -297,6 +310,41 @@ function createStackedBars(data, mainCsvData) {
   //   var bar = d3.select(this);
   //   //console.log("Bar " + i + ":", bar.style("fill"));
   // });
+
+  // ----------------
+  // Create red circle
+  // ----------------
+  mainCsvData.forEach(function (d, i) {
+    svg.append("circle")
+      .attr("cx", x(d.countryName) + x.bandwidth() / 2)
+      .attr("cy", y((d.pollutionDepressionRatio).toFixed(0)))
+      .attr("r", 10)
+      .style("fill", "yellow")
+      .on("mouseover", function (i) {
+        tooltip
+          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio)+"</h3>")
+          .style("opacity", 1)
+          .style("background-color", "white")
+      })
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave);
+    svg.append("text")
+      .attr("x", x(d.countryName) + x.bandwidth() / 2)
+      .attr("y", y((d.pollutionDepressionRatio).toFixed(0)) + 5)
+      .text((d.pollutionDepressionRatio).toFixed(0))
+      .style("text-anchor", "middle")
+      .style("fill", "black")
+      .style("font-size", "12px")
+      .on("mouseover", function (i) {
+        tooltip
+          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio)+"</h3>")
+          .style("opacity", 1)
+          .style("background-color", "white")
+      })
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave);
+  });
+
 }
 
 
