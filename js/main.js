@@ -1,4 +1,5 @@
 var selectedRegion = "Asia";
+var countrySelectedonMap;
 
 
 //Extracting the PollutionDepression main data
@@ -95,28 +96,39 @@ d3.json("data/countries.geojson").then(function (world) {
     .style("stroke", "#fff")
     .style("stroke-width", "1.5");
 
+  var currentSelection = null;
   // Add interactivity to the map
   map.selectAll("path")
     .on("mouseover", function () {
-      d3.select(this).style("fill", "orange");
+      if (this !== currentSelection) {
+        d3.select(this).style("fill", "darkgrey");
+      }
     })
     .on("mouseout", function () {
-      d3.select(this).style("fill", "#ccc");
+      if (this !== currentSelection) {
+        d3.select(this).style("fill", "#ccc");
+      }
     })
     .on("click", function (d, i) {
+      if (currentSelection) {
+        d3.select(currentSelection).style("fill", "#ccc");
+      }
+      d3.select(this).style("fill", "orange");
+      currentSelection = this;
       var clickedCountry = i.properties.ADMIN == "United States of America" ? "United States" : i.properties.ADMIN;
+      countrySelectedonMap = clickedCountry;
       //checking if the clicked country exists in our csv data
       var result = countryDataforMap.find(d => d.countryName == clickedCountry);
-      if(result !== undefined){
+      if (result !== undefined) {
         //if the clicked country exists take its region
         var clickedRegion = result.region;
         //setting the global variable with this region
         selectedRegion = clickedRegion;
         let regionDropdown = d3.select("#filterRegion");
         regionDropdown.property("value", selectedRegion)
-        .dispatch("change");
+          .dispatch("change");
       }
-      
+
       // recover the region that has been chosen
       // selectedOption = d3.select(this).property("value");
       // selectedRegion = selectedOption;
@@ -124,7 +136,8 @@ d3.json("data/countries.geojson").then(function (world) {
       // mainCsvData = csvData.filter(data => data.region == selectedRegion);
       // createStackedBars(stackBarData, mainCsvData);
 
-    });
+    })
+    .on("mouseleave")
 });
 
 function createStackedBars(data, mainCsvData) {
@@ -166,7 +179,12 @@ function createStackedBars(data, mainCsvData) {
     .style("text-anchor", "end")
     .attr("dx", "-.8em")
     .attr("dy", ".15em")
-    .attr("transform", "rotate(-65)");
+    .attr("transform", "rotate(-65)")
+    .style("color", function (d, i) {
+      if (d == countrySelectedonMap) {
+        return "orange";
+      }
+    });
 
   // Add Y axis
   var y = d3.scaleLinear()
@@ -187,6 +205,51 @@ function createStackedBars(data, mainCsvData) {
   //stack the data --> stack per subgroup
   var stackedData = d3.stack().keys(subgroups)(data)
 
+  // ----------------
+  // Create a tooltip
+  // ----------------
+  var tooltip = d3.select("#bar")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("position", "absolute")
+
+  // Three function that change the tooltip when user hover / move / leave a cell
+  var mouseover = function (d, i) {
+    var subgroupName = d3.select(this.parentNode).datum().key;
+    var country = i.data.countries;
+    var countryData = mainCsvData.filter(function (m) { return m.countryName === country; })[0];
+    let htmlText;
+    if (subgroupName == "Pollution") {
+      htmlText = "<h3>" + subgroupName + " data for  " + countryData.countryName + "</h3><li>Particle Pollution : " + countryData.particlePollution + "</li><li>Global rank in particle pollution : " + countryData.particlePollutionRank + "</li><li>Region : " + countryData.region + " (" + countryData.subregion + ")</li>";
+    } else {
+      htmlText = "<h3>" + subgroupName + " Prevalence data for  " + countryData.countryName + "</h3><li>Depression Prevalence : " + countryData.depressionPrevalence + "</li><li>Global rank in prevalence of depression: " + countryData.depressionPrevalenceRank + "</li><li>Region : " + countryData.region + " (" + countryData.subregion + ")</li>"
+    }
+    tooltip
+      .html(htmlText)
+      .style("opacity", 1)
+      .style("background-color", function (d, i, n) {
+        if (country == countrySelectedonMap) return "orange";
+        else return "white";
+      })
+  }
+
+  var mousemove = function (d) {
+    //console.log(d3.pointer(d));
+    tooltip
+      .style("left", (d3.pointer(d)[0] + 50) + "px")
+      .style("top", (d3.pointer(d)[1] + 350) + "px")
+  }
+  var mouseleave = function (d) {
+    tooltip
+      .style("opacity", 0)
+  }
+
   // create stacked bars
   let bars = svg.append("g")
     .selectAll("g")
@@ -194,17 +257,19 @@ function createStackedBars(data, mainCsvData) {
     .data(stackedData)
     .enter().append("g")
     .selectAll("rect")
+    .style("fill", function (d, i) {
+
+      console.log(countrySelectedonMap);
+    })
     // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(function (d, i) {
       return d;
     })
     .enter().append("rect")
     .style("fill", function (d, i) {
-
       var country = d.data.countries;
       var countryData = mainCsvData.filter(function (m) { return m.countryName === country; })[0];
       if (countryData) {
-
         if (d[0] == 0) {
           //console.log(countryData.countryName,countryData.depressionPrevalence,`depression color: ${depressionColor(countryData.depressionPrevalence)}`);
           color = depressionColor(countryData.depressionPrevalence);
@@ -222,6 +287,9 @@ function createStackedBars(data, mainCsvData) {
     .attr("y", function (d) { return y(d[1]); })
     .attr("height", function (d) { return y(d[0]) - y(d[1]); })
     .attr("width", x.bandwidth())
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave)
 
 
   // //Loop through each subgroup of bars
