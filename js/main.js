@@ -118,6 +118,8 @@ d3.json("data/countries.geojson").then(function (world) {
     })
     .style("stroke", "#fff")
     .style("stroke-width", "1.5");
+  
+    d3.select(".loader").style("display", "none");
 
   var currentSelection = null;
   // Add interactivity to the map
