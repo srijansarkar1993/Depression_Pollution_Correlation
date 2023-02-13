@@ -93,7 +93,18 @@ d3.json("data/countries.geojson").then(function (world) {
     // .attr("id", function (d, i) {
     //   return "country" + d.properties.ADMIN;
     // })
-    .style("fill", "#ccc")
+    //.style("fill", "#ccc")
+    .style("fill", function (d, i) {
+      var clickedCountry = d.properties.ADMIN == "United States of America" ? "United States" : d.properties.ADMIN;
+      //checking if the clicked country exists in our csv data
+      var result = countryDataforMap.find(d => d.countryName == clickedCountry);
+      if (result !== undefined) {
+        //to color the selected rgion orange on load
+        if(selectedRegion == result.region)
+          return "orange";
+        else return "#ccc";
+      } else return "#ccc";
+    })
     .style("stroke", "#fff")
     .style("stroke-width", "1.5");
 
@@ -101,33 +112,43 @@ d3.json("data/countries.geojson").then(function (world) {
   // Add interactivity to the map
   map.selectAll("path")
     .on("mouseover", function () {
-      if (this !== currentSelection) {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "orange") {
         d3.select(this).style("fill", "darkgrey");
       }
     })
     .on("mouseout", function () {
-      if (this !== currentSelection) {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "orange") {
         d3.select(this).style("fill", "#ccc");
       }
     })
     .on("click", function (d, i) {
-      if (currentSelection) {
-        d3.select(currentSelection).style("fill", "#ccc");
-      }
-      d3.select(this).style("fill", "orange");
       currentSelection = this;
       var clickedCountry = i.properties.ADMIN == "United States of America" ? "United States" : i.properties.ADMIN;
       countrySelectedonMap = clickedCountry;
       //checking if the clicked country exists in our csv data
       var result = countryDataforMap.find(d => d.countryName == clickedCountry);
       if (result !== undefined) {
+        d3.selectAll("path").style("fill", "#ccc");
+        d3.select(this).style("fill", "orange");
         //if the clicked country exists take its region
         var clickedRegion = result.region;
         //setting the global variable with this region
         selectedRegion = clickedRegion;
+        //fetching and highlighting all countries of this region on the map
+        var allCountriesInThisRegion = countryDataforMap
+          .filter(function (d) { return d.region === selectedRegion; })
+          .map(function (d) { return d.countryName; });
+        // Loop through the array of countries and update the stroke color in map
+        allCountriesInThisRegion.forEach(function (c) {
+          updateStrokeColor(map, c);
+        });
+
+        //updating and triggering the region dropdown
         let regionDropdown = d3.select("#filterRegion");
         regionDropdown.property("value", selectedRegion)
           .dispatch("change");
+      } else{
+        console.log("cant find this country in our data");
       }
 
       // recover the region that has been chosen
@@ -322,7 +343,7 @@ function createStackedBars(data, mainCsvData) {
       .style("fill", "yellow")
       .on("mouseover", function (i) {
         tooltip
-          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio)+"</h3>")
+          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio) + "</h3>")
           .style("opacity", 1)
           .style("background-color", "white")
       })
@@ -337,7 +358,7 @@ function createStackedBars(data, mainCsvData) {
       .style("font-size", "12px")
       .on("mouseover", function (i) {
         tooltip
-          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio)+"</h3>")
+          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio) + "</h3>")
           .style("opacity", 1)
           .style("background-color", "white")
       })
@@ -346,6 +367,15 @@ function createStackedBars(data, mainCsvData) {
   });
 
 }
+
+// Change the stroke color for specific countries
+var updateStrokeColor = function(map, country, color) {
+  map.selectAll("path")
+    .filter(function(d) {
+      return d.properties.ADMIN === country;
+    })
+    .style("fill", "orange");
+};
 
 
 
