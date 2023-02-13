@@ -1,5 +1,6 @@
 var selectedRegion = "Asia";
 var countrySelectedonMap;
+let map;
 
 
 //Extracting the PollutionDepression main data
@@ -60,6 +61,16 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     // filter the countries data with this selected region
     mainCsvData = csvData.filter(data => data.region == selectedRegion);
     createStackedBars(stackBarData, mainCsvData);
+    console.log(d3.selectAll("path"));
+
+    map.selectAll("path").style("fill", "#ccc");
+    var allCountriesInThisRegion = countryDataforMap
+          .filter(function (d) { return d.region === selectedRegion; })
+          .map(function (d) { return d.countryName; });
+        // Loop through the array of countries and update the stroke color in map
+        allCountriesInThisRegion.forEach(function (c) {
+          updateStrokeColor(map, c);
+        })
   })
 
 })
@@ -80,7 +91,7 @@ d3.json("data/countries.geojson").then(function (world) {
   // var countries = topojson.feature(world, world.objects.countries).features;
 
   // Create the map
-  var map = d3.select("#mapcontainer")
+  map = d3.select("#mapcontainer")
     .append("svg")
     .attr("width", "100%")
     .attr("height", "100%");
@@ -149,6 +160,7 @@ d3.json("data/countries.geojson").then(function (world) {
           .dispatch("change");
       } else{
         console.log("cant find this country in our data");
+        d3.selectAll("path").style("fill", "#ccc");
       }
 
       // recover the region that has been chosen
