@@ -1,4 +1,4 @@
-var selectedRegion = "Asia";
+var selectedRegion = "All";
 var countrySelectedonMap;
 let map;
 
@@ -27,12 +27,42 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     year: 2023
   }
 }).then(csvData => {
-  console.log((d3.max(csvData, d => +d.pollutionDepressionRatio)).toFixed(0));
+  // console.log((d3.max(csvData, d => +d.pollutionDepressionRatio)).toFixed(0));
   countryDataforMap = csvData;
-  mainCsvData = csvData.filter(data => data.region == selectedRegion);
+  if (selectedRegion != "All")
+    mainCsvData = csvData.filter(data => data.region == selectedRegion);
+  else mainCsvData = csvData;
+
+  // Calculate the correlation coefficient for each country and add it as a new property to the data
+  mainCsvData.forEach(d => {
+    const depression_std = (d.depressionPrevalence - d3.mean(mainCsvData, d => d.depressionPrevalence)) / d3.deviation(mainCsvData, d => d.depressionPrevalence);
+    const pollution_std = (d.particlePollution - d3.mean(mainCsvData, d => d.particlePollution)) / d3.deviation(mainCsvData, d => d.particlePollution);
+    const correlation = correlationCoefficient([depression_std, pollution_std], mainCsvData.map(d => d.population));
+
+    d.correlation = correlation;
+  });
+  createScatterPlot(mainCsvData);
+
+  //extract the values of the depression and pollution variables in arrays
+  var depressionVa
+
+  var info = "<h3>Countries in " + selectedRegion + " sorted as per depression</h3>";
+  var counter = 0;
+  console.log(mainCsvData);
+  mainCsvData.sort(function (a, b) {
+    return a.depressionPrevalence - b.depressionPrevalence;
+  });
+  console.log(mainCsvData);
+  mainCsvData.forEach(function (element) {
+    info = info !== undefined ? info + "<br>" + counter + ". " + element.countryName : "";
+    counter++;
+  })
+  d3.select("#info").html(info);
+
 
   //getting the unique regions from the data
   const uniqueRegions = [...new Set(csvData.map(item => item.region))];
+  uniqueRegions.unshift("All");
   //adding the options to the region selection dropdown
   d3.select("#filterRegion")
     .selectAll('myOptions')
@@ -59,18 +89,26 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     selectedOption = d3.select(this).property("value");
     selectedRegion = selectedOption;
     // filter the countries data with this selected region
-    mainCsvData = csvData.filter(data => data.region == selectedRegion);
+    mainCsvData = selectedRegion != "All" ? csvData.filter(data => data.region == selectedRegion) : csvData;
+    // Calculate the correlation coefficient for each country and add it as a new property to the data
+    mainCsvData.forEach(d => {
+      const depression_std = (d.depressionPrevalence - d3.mean(mainCsvData, d => d.depressionPrevalence)) / d3.deviation(mainCsvData, d => d.depressionPrevalence);
+      const pollution_std = (d.particlePollution - d3.mean(mainCsvData, d => d.particlePollution)) / d3.deviation(mainCsvData, d => d.particlePollution);
+      const correlation = correlationCoefficient([depression_std, pollution_std], mainCsvData.map(d => d.population));
+
+      d.correlation = correlation;
+    });
+    createScatterPlot(mainCsvData);
     createStackedBars(stackBarData, mainCsvData);
-    console.log(d3.selectAll("path"));
 
     map.selectAll("path").style("fill", "#ccc");
     var allCountriesInThisRegion = countryDataforMap
-          .filter(function (d) { return d.region === selectedRegion; })
-          .map(function (d) { return d.countryName; });
-        // Loop through the array of countries and update the stroke color in map
-        allCountriesInThisRegion.forEach(function (c) {
-          updateStrokeColor(map, c);
-        })
+      .filter(function (d) { return d.region === selectedRegion; })
+      .map(function (d) { return d.countryName; });
+    // Loop through the array of countries and update the stroke color in map
+    allCountriesInThisRegion.forEach(function (c) {
+      updateStrokeColor(map, c);
+    })
   })
 
 })
@@ -111,15 +149,15 @@ d3.json("data/countries.geojson").then(function (world) {
       var result = countryDataforMap.find(d => d.countryName == clickedCountry);
       if (result !== undefined) {
         //to color the selected rgion orange on load
-        if(selectedRegion == result.region)
+        if (selectedRegion == result.region)
           return "orange";
         else return "#ccc";
       } else return "#ccc";
     })
     .style("stroke", "#fff")
     .style("stroke-width", "1.5");
-  
-    d3.select(".loader").style("display", "none");
+
+  d3.select(".loader").style("display", "none");
 
   var currentSelection = null;
   // Add interactivity to the map
@@ -160,7 +198,7 @@ d3.json("data/countries.geojson").then(function (world) {
         let regionDropdown = d3.select("#filterRegion");
         regionDropdown.property("value", selectedRegion)
           .dispatch("change");
-      } else{
+      } else {
         console.log("cant find this country in our data");
         d3.selectAll("path").style("fill", "#ccc");
       }
@@ -170,14 +208,139 @@ d3.json("data/countries.geojson").then(function (world) {
       // selectedRegion = selectedOption;
       // // filter the countries data with this selected region
       // mainCsvData = csvData.filter(data => data.region == selectedRegion);
-      // createStackedBars(stackBarData, mainCsvData);
 
     })
     .on("mouseleave")
 });
 
-function createStackedBars(data, mainCsvData) {
 
+
+function createScatterPlot(data) {
+  var margin = { top: 20, right: 90, bottom: 50, left: 40 },
+    width = 500 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+  // calculate the line of best fit using linear regression
+  //This code calculates the mean of the pollution and depression values. 
+  //It then uses these means to calculate the slope (m) and y-intercept (b) of the line
+  var n = data.length;
+  var x_mean = d3.mean(data, d => d.particlePollution);
+
+  var y_mean = d3.mean(data, d => d.depressionPrevalence);
+  var num = d3.sum(data, d => (d.particlePollution - x_mean) * (d.depressionPrevalence - y_mean));
+  var den = d3.sum(data, d => Math.pow(d.particlePollution - x_mean, 2));
+  var m = num / den;
+  var b = y_mean - m * x_mean;
+
+  // define the x and y scales
+  var maxValue = Math.max.apply(null, data.map(function (d) {
+    return d.particlePollution;
+  }).filter(function (value) {
+    return !isNaN(value);
+  }));
+  var x = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([0, width]);
+
+
+  var y = d3.scaleLinear()
+    .domain([0, d3.max(data, function (d) { return d.depressionPrevalence; })])
+    .range([height, 0]);
+
+  // define the line generator for the best-fit line using mean and y-intercept
+  var line = d3.line()
+    .x(d => x(d.particlePollution))
+    .y(d => y(m * d.particlePollution + b));
+
+  // create the svg element
+  var svg = d3.select("#scatter").html("").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var color = d3.scaleLinear()
+    .domain([-0.5, 0.5])
+    .range(["#003399", "#b3d9ff"]);
+
+  var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("visibility", "hidden");
+
+  // add the best-fit line to the svg
+  svg.append("path")
+    .datum(data)
+    .attr("fill", "red")
+    .attr("stroke", "black")
+    .attr("d", line);
+
+  // add the data points to the svg
+  svg.selectAll(".dot")
+    .data(data)
+    .enter().append("circle")
+    .attr("class", "dot")
+    .attr("cx", d => x(d.particlePollution))
+    .attr("cy", d => y(d.depressionPrevalence))
+    // .attr("r", 5)
+    .attr("r", function (d) {
+      return Math.sqrt(d.population) / 1000;
+    }) // map population data to circle size
+    .style("fill", function (d) {
+      var distance = d.depressionPrevalence - (m * d.particlePollution + b);
+      //console.log();
+      return color(Math.abs(distance));
+    })
+    .attr("opacity", 0.5)
+    .attr("country", d => d.countryName);
+  // .on("mouseover", function (d) {
+  //   tooltip.text("Country: " + d.countryName + ", Population: " + d.population + ", Land Area: " + d.countryArea + " sq km");
+  //   return tooltip.style("visibility", "visible");
+  // })
+  // .on("mousemove", function () {
+  //   return tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");
+  // })
+  // .on("mouseout", function () {
+  //   return tooltip.style("visibility", "hidden");
+  // });
+
+  svg.selectAll(".text")
+    .data(data)
+    .enter().append("text")
+    .text(d => d.countryName)
+    .attr("x", d => x(d.particlePollution) + 5)
+    .attr("y", d => y(d.depressionPrevalence) - 5)
+    .style("font-size", "10px")
+    .style("fill", "red");
+
+
+  // add the x and y axis to the svg
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+
+  // add x-axis label
+  svg.append("text")
+    .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
+    .style("text-anchor", "middle")
+    .text("Particle Pollution");
+
+  // add y-axis label
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Depression Prevalence");
+
+}
+
+function createStackedBars(data, mainCsvData) {
   //filtering the data as per the region selected
   let filteredResult = data.filter(obj1 => {
     return mainCsvData.some(obj2 => obj2.countryName === obj1.countries);
@@ -186,8 +349,8 @@ function createStackedBars(data, mainCsvData) {
   data = filteredResult;
 
   // Set the dimensions and margins of the graph
-  const width = 900, height = 400;
-  const margin = { top: 10, right: 30, bottom: 80, left: 20 };
+  const width = 1000, height = 400;
+  const margin = { top: 10, right: 30, bottom: 80, left: 50 };
 
   // Create the SVG container
   const svg = d3.select("#bar").html("")
@@ -233,16 +396,18 @@ function createStackedBars(data, mainCsvData) {
   var y = d3.scaleLinear()
     .domain([0, 20])
     .range([height, 0]);
-  svg.append("g")
-    .call(d3.axisLeft(y));
+  // svg.append("g")
+  //   .call(d3.axisLeft(y));
 
   // Add y-axis label
   svg.append("text")
     .attr("text-anchor", "middle")
     .attr("transform", "translate(" + (-margin.left / 2) + "," + (height / 2) + ")rotate(-90)")
-    .text("Particle Pollution to Depression Prevalence ratio")
+    .text("Correlation Coefficient")
     .style("font-size", "14px")
-    .attr("y", 10);
+    //.attr("y", 5);
+
+
 
   // Create the color scales for depression and pollution based on area and density
   var depressionColor = d3.scaleLinear()
@@ -346,50 +511,88 @@ function createStackedBars(data, mainCsvData) {
   //   //console.log("Bar " + i + ":", bar.style("fill"));
   // });
 
+  // Create the new y-axis
+  const yCircles = d3.scaleLinear()
+    .domain([-1, 1])
+    .range([height, 0]);
+  const yAxisCircles = d3.axisLeft(yCircles);
+
+  // Append the new y-axis to the SVG element
+  svg.append("g")
+    .attr("class", "y-axis-circles")
+    .call(yAxisCircles);
+
+  // Hide the original y-axis
+  svg.selectAll(".y-axis path, .y-axis line, .y-axis .tick line")
+    .style("display", "none");
   // ----------------
-  // Create red circle
+  // Create yellow circle
   // ----------------
+
+  const correlationScale = d3.scaleLinear()
+    .domain([-1, 1])
+    .range([height, 0]);
+
   mainCsvData.forEach(function (d, i) {
     svg.append("circle")
       .attr("cx", x(d.countryName) + x.bandwidth() / 2)
-      .attr("cy", y((d.pollutionDepressionRatio).toFixed(0)))
+      // .attr("cy", y((d.correlation)))
+      .attr("cy", yCircles(d.correlation))
       .attr("r", 10)
-      .style("fill", "yellow")
+      .style("fill", function (d, i) {
+        return "yellow"
+      })
       .on("mouseover", function (i) {
         tooltip
-          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio) + "</h3>")
+          .html("<h3>correlation coefficient = " + (d.correlation) + "</h3>")
           .style("opacity", 1)
           .style("background-color", "white")
       })
       .on("mousemove", mousemove)
       .on("mouseleave", mouseleave);
-    svg.append("text")
-      .attr("x", x(d.countryName) + x.bandwidth() / 2)
-      .attr("y", y((d.pollutionDepressionRatio).toFixed(0)) + 5)
-      .text((d.pollutionDepressionRatio).toFixed(0))
-      .style("text-anchor", "middle")
-      .style("fill", "black")
-      .style("font-size", "12px")
-      .on("mouseover", function (i) {
-        tooltip
-          .html("<h3>Pollution : Depression = " + (d.pollutionDepressionRatio) + "</h3>")
-          .style("opacity", 1)
-          .style("background-color", "white")
-      })
-      .on("mousemove", mousemove)
-      .on("mouseleave", mouseleave);
+    // svg.append("text")
+    //   .attr("x", x(d.countryName) + x.bandwidth() / 2)
+    //   .attr("y", correlationScale(d.correlation) + 5)
+    //   .text((d.correlation))
+    //   .style("text-anchor", "middle")
+    //   .style("fill", "black")
+    //   .style("font-size", "12px")
+    //   .on("mouseover", function (i) {
+    //     tooltip
+    //       .html("<h3>Pearson's correlation coefficient: " + (d.correlation) + "</h3>")
+    //       .style("opacity", 1)
+    //       .style("background-color", "white")
+    //   })
+    //   .on("mousemove", mousemove)
+    //   .on("mouseleave", mouseleave);
   });
+
+
+
 
 }
 
 // Change the stroke color for specific countries
-var updateStrokeColor = function(map, country, color) {
+var updateStrokeColor = function (map, country, color) {
   map.selectAll("path")
-    .filter(function(d) {
+    .filter(function (d) {
       return d.properties.ADMIN === country;
     })
     .style("fill", "orange");
 };
+
+// Define a function to calculate the correlation coefficient between two variables
+function correlationCoefficient(x, y) {
+  const n = x.length;
+  const x_mean = d3.mean(x);
+  const y_mean = d3.mean(y);
+  const x_dev = x.map(d => d - x_mean);
+  const y_dev = y.map(d => d - y_mean);
+  const numerator = d3.sum(x_dev.map((d, i) => d * y_dev[i]));
+  const denominator = Math.sqrt(d3.sum(x_dev.map(d => d ** 2)) * d3.sum(y_dev.map(d => d ** 2)));
+  return numerator / denominator;
+}
+
 
 
 

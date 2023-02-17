@@ -154,3 +154,9 @@ fieldset {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
   }
+
+  .dot {
+	fill: steelblue;
+	stroke: black;
+	stroke-width: 1.5px;
+  }
