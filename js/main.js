@@ -191,7 +191,7 @@ d3.json("data/countries.geojson").then(function (world) {
           .map(function (d) { return d.countryName; });
         // Loop through the array of countries and update the stroke color in map
         allCountriesInThisRegion.forEach(function (c) {
-          updateStrokeColor(map, c);
+          updateStrokeColor(map, c, clickedCountry);
         });
 
         //updating and triggering the region dropdown
@@ -573,7 +573,8 @@ function createStackedBars(data, mainCsvData) {
 }
 
 // Change the stroke color for specific countries
-var updateStrokeColor = function (map, country, color) {
+var updateStrokeColor = function (map, country, selectedCountry) {
+  console.log(selectedCountry)
   map.selectAll("path")
     .filter(function (d) {
       return d.properties.ADMIN === country;
