@@ -162,12 +162,12 @@ d3.json("data/countries.geojson").then(function (world) {
   // Add interactivity to the map
   map.selectAll("path")
     .on("mouseover", function () {
-      if (this !== currentSelection && d3.select(this).style("fill") !== "orange") {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "orange" && d3.select(this).style("fill") !== "red") {
         d3.select(this).style("fill", "darkgrey");
       }
     })
     .on("mouseout", function () {
-      if (this !== currentSelection && d3.select(this).style("fill") !== "orange") {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "orange" && d3.select(this).style("fill") !== "red") {
         d3.select(this).style("fill", "#ccc");
       }
     })
@@ -179,7 +179,7 @@ d3.json("data/countries.geojson").then(function (world) {
       var result = countryDataforMap.find(d => d.countryName == clickedCountry);
       if (result !== undefined) {
         d3.selectAll("path").style("fill", "#ccc");
-        d3.select(this).style("fill", "orange");
+        d3.select(this).style("fill", "red");
         //if the clicked country exists take its region
         var clickedRegion = result.region;
         //setting the global variable with this region
@@ -308,9 +308,9 @@ function createScatterPlot(data, scatterPlotView) {
     .on("mouseover", function (d, i) {
       if (scatterPlotView == "landarea")
         tooltip.html("<li>Country: " + i.countryName + "</li><li>Land Area:" + i.countryArea + "</li>");
-        else if (scatterPlotView == "population")
+      else if (scatterPlotView == "population")
         tooltip.html("<li>Country: " + i.countryName + "</li><li>Population: " + i.population + "</li>");
-        tooltip.style("visibility", "visible");
+      tooltip.style("visibility", "visible");
     })
     .on("mousemove", function (d) {
       tooltip.style("top", (d.clientY - 10) + "px").style("left", (d.clientX + 10) + "px");
@@ -395,7 +395,7 @@ function createStackedBars(data, mainCsvData) {
     .attr("transform", "rotate(-65)")
     .style("color", function (d, i) {
       if (d == countrySelectedonMap) {
-        return "orange";
+        return "red";
       }
     });
 
@@ -588,12 +588,18 @@ function createStackedBars(data, mainCsvData) {
 
 // Change the stroke color for specific countries
 var updateStrokeColor = function (map, country, selectedCountry) {
-  console.log(selectedCountry)
   map.selectAll("path")
     .filter(function (d) {
       return d.properties.ADMIN === country;
     })
-    .style("fill", "orange");
+    .style("fill", function (d, i) {
+      if (d.properties.ADMIN === selectedCountry){
+        console.log(d.properties.ADMIN);
+        return "red";
+      }
+        
+      else return "orange"
+    });
 };
 
 // Define a function to calculate the correlation coefficient between two variables

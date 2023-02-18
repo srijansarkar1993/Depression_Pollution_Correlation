@@ -52,13 +52,13 @@
 				</div>
 			</div>
 			<div class="row" id="visualizationRow">
-				<div class="col-md-6">
+				<div class="col-md-6" id="globalMap">
 					<div id="mapcontainer" class="responsive-svg-container"
 						style="position: relative; width: 700px; height: 500px;">
 						<div class="loader"></div>
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-6" id="scatterPlot">
 					<div>Scatter points sized by </div>
 					<div class="radio-buttons">
 						<div class="radio-button">
@@ -70,47 +70,54 @@
 					</div>
 					<div id="scatter"></div>
 				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row" id="infoRow">
-		<div class="col-md-10">
-			<div id="bar" class="responsive-svg-container"></div>
-			<div id="legend" class="responsive-svg-container">
-				<img src="img/gradient-bar-legend.PNG" class="img-fluid" alt="Responsive image">
-			</div>
-
-			<div class="row" id="infoRow">
-				<div class="col-md-12">
-					<h2 class="subheading">About This Site</h2>
-					<h3 class="sections"> What is it and who is it for?</h3>
-					<p>The visualization attempts to show the correlation between depression prevalence and particle
-						pollution in air across global countries based on data
-						for 2023. This visualization is targeted to individuals with depression (currently or in past),
-						medical practitioners and researchers,
-						pharmaceutical organisations and also for anyone interested in this topic.</p>
-					<h3 class="sections"> Why is it important?</h3>
-					<p>The relationship between air pollution and mental health is a growing area of concern and could
-						have significant implications for public health.
-						Understanding the relationship between air pollution and depression is important for improving
-						public health, reducing the burden of mental illness, and ultimately improving quality of life
-						for individuals and communities affected by air pollution.</p>
-					<h3 class="sections"> How do you look at it?</h3>
-					<p> There are 2 parts to the visualization.
-						In the first part we can see a global map where the user can interact by clicking on any
-						country.
-						In the second part we have a stacked bar chart view, where the upper bars represent the severity
-						of particle pollution in air and
-						the lower bars represent the severity of depression across the countries within a geographical
-						regions.The position of the red dots (TBD) will help to visualize the
-						correlation between air pollution and depression.
-						Users can select the region to view through the dropdown in the top or by selecting a country in
-						the global map.
-					</p>
+				<div class="col-md-12" id="stackedbar">
+					<div>
+						<select id="sortDropdown" class="dropdown">
+						  <option value="depressionDescending">Depression - High to Low</option>
+						  <option value="depressionAscending">Depression - Low to High</option>
+						  <option value="pollutionDescending">Pollution - High to Low</option>
+						  <option value="pollutionAscending">Pollution - Low to High</option>
+						</select>
+					  </div>
+					<div id="bar" class="responsive-svg-container"></div>
+					<div id="legend" class="responsive-svg-container">
+						<img src="img/gradient-bar-legend.PNG" class="img-fluid" alt="Responsive image">
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+	<div class="row" id="infoRow">
+		<div class="col-md-12">
+			<h2 class="subheading">About This Site</h2>
+			<h3 class="sections"> What is it and who is it for?</h3>
+			<p>The visualization attempts to show the correlation between depression prevalence and particle
+				pollution in air across global countries based on data
+				for 2023. This visualization is targeted to individuals with depression (currently or in past),
+				medical practitioners and researchers,
+				pharmaceutical organisations and also for anyone interested in this topic.</p>
+			<h3 class="sections"> Why is it important?</h3>
+			<p>The relationship between air pollution and mental health is a growing area of concern and could
+				have significant implications for public health.
+				Understanding the relationship between air pollution and depression is important for improving
+				public health, reducing the burden of mental illness, and ultimately improving quality of life
+				for individuals and communities affected by air pollution.</p>
+			<h3 class="sections"> How do you look at it?</h3>
+			<p> There are 2 parts to the visualization.
+				In the first part we can see a global map where the user can interact by clicking on any
+				country.
+				In the second part we have a stacked bar chart view, where the upper bars represent the severity
+				of particle pollution in air and
+				the lower bars represent the severity of depression across the countries within a geographical
+				regions.The position of the red dots (TBD) will help to visualize the
+				correlation between air pollution and depression.
+				Users can select the region to view through the dropdown in the top or by selecting a country in
+				the global map.
+			</p>
+		</div>
+	</div>
+
+
 
 	<script src="https://d3js.org/d3.v7.min.js"></script>
 	<!-- <script src="https://d3js.org/d3-queue.v2.min.js"></script> -->
