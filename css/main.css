@@ -165,3 +165,46 @@ fieldset {
 	stroke: black;
 	stroke-width: 1.5px;
 }
+
+.radio-buttons {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+  }
+  
+  .radio-button {
+	margin-bottom: 10px;
+  }
+  
+  input[type="radio"] {
+	display: none;
+  }
+  
+  label {
+	position: relative;
+	padding-left: 25px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #555;
+  }
+  
+  label:before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 3px;
+	width: 16px;
+	height: 16px;
+	border: 1px solid #555;
+	border-radius: 50%;
+  }
+  
+  input[type="radio"]:checked + label:before {
+	background-color: #ffa500;
+	border-color: #ffa500;
+  }
+  
+  label:hover:before {
+	border-color: #007bff;
+  }
+  

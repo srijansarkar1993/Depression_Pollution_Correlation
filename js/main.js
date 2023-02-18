@@ -1,6 +1,7 @@
 var selectedRegion = "All";
 var countrySelectedonMap;
 let map;
+let scatterPlotView = "landarea";
 
 
 //Extracting the PollutionDepression main data
@@ -41,18 +42,16 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
 
     d.correlation = correlation;
   });
-  createScatterPlot(mainCsvData);
+  createScatterPlot(mainCsvData, scatterPlotView);
 
   //extract the values of the depression and pollution variables in arrays
   var depressionVa
 
   var info = "<h3>Countries in " + selectedRegion + " sorted as per depression</h3>";
   var counter = 0;
-  console.log(mainCsvData);
   mainCsvData.sort(function (a, b) {
     return a.depressionPrevalence - b.depressionPrevalence;
   });
-  console.log(mainCsvData);
   mainCsvData.forEach(function (element) {
     info = info !== undefined ? info + "<br>" + counter + ". " + element.countryName : "";
     counter++;
@@ -98,7 +97,7 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
 
       d.correlation = correlation;
     });
-    createScatterPlot(mainCsvData);
+    createScatterPlot(mainCsvData, scatterPlotView);
     createStackedBars(stackBarData, mainCsvData);
 
     map.selectAll("path").style("fill", "#ccc");
@@ -215,10 +214,12 @@ d3.json("data/countries.geojson").then(function (world) {
 
 
 
-function createScatterPlot(data) {
-  var margin = { top: 20, right: 90, bottom: 50, left: 40 },
+function createScatterPlot(data, scatterPlotView) {
+  var margin = { top: 50, right: 90, bottom: 100, left: 40 },
     width = 500 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    height = 450 - margin.top - margin.bottom;
+
+  var viewMode = "area"; // default view mode is "area"
 
   // calculate the line of best fit using linear regression
   //This code calculates the mean of the pollution and depression values. 
@@ -238,8 +239,13 @@ function createScatterPlot(data) {
   }).filter(function (value) {
     return !isNaN(value);
   }));
+  var minValue = Math.min.apply(null, data.map(function (d) {
+    return d.particlePollution;
+  }).filter(function (value) {
+    return !isNaN(value);
+  }));
   var x = d3.scaleLinear()
-    .domain([0, maxValue])
+    .domain([0, maxValue + 20])
     .range([0, width]);
 
 
@@ -266,7 +272,8 @@ function createScatterPlot(data) {
   var tooltip = d3.select("body")
     .append("div")
     .style("position", "absolute")
-    .style("visibility", "hidden");
+    .style("visibility", "hidden")
+    .text("");;
 
   // add the best-fit line to the svg
   svg.append("path")
@@ -284,7 +291,10 @@ function createScatterPlot(data) {
     .attr("cy", d => y(d.depressionPrevalence))
     // .attr("r", 5)
     .attr("r", function (d) {
-      return Math.sqrt(d.population) / 1000;
+      if (scatterPlotView == "landarea")
+        return Math.sqrt(d.countryArea) / 100;
+      else if (scatterPlotView == "population")
+        return Math.sqrt(d.population) / 1000;
     }) // map population data to circle size
     .style("fill", function (d) {
       var distance = d.depressionPrevalence - (m * d.particlePollution + b);
@@ -292,26 +302,31 @@ function createScatterPlot(data) {
       return color(Math.abs(distance));
     })
     .attr("opacity", 0.5)
-    .attr("country", d => d.countryName);
-  // .on("mouseover", function (d) {
-  //   tooltip.text("Country: " + d.countryName + ", Population: " + d.population + ", Land Area: " + d.countryArea + " sq km");
-  //   return tooltip.style("visibility", "visible");
-  // })
-  // .on("mousemove", function () {
-  //   return tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");
-  // })
-  // .on("mouseout", function () {
-  //   return tooltip.style("visibility", "hidden");
-  // });
+    .attr("country", d => d.countryName)
+    // .append("title")
+    // .html(d => d.countryName, d => d.population);
+    .on("mouseover", function (d, i) {
+      if (scatterPlotView == "landarea")
+        tooltip.html("<li>Country: " + i.countryName + "</li><li>Land Area:" + i.countryArea + "</li>");
+        else if (scatterPlotView == "population")
+        tooltip.html("<li>Country: " + i.countryName + "</li><li>Population: " + i.population + "</li>");
+        tooltip.style("visibility", "visible");
+    })
+    .on("mousemove", function (d) {
+      tooltip.style("top", (d.clientY - 10) + "px").style("left", (d.clientX + 10) + "px");
+    })
+    .on("mouseout", function (d) {
+      tooltip.style("visibility", "hidden");
+    });
 
-  svg.selectAll(".text")
-    .data(data)
-    .enter().append("text")
-    .text(d => d.countryName)
-    .attr("x", d => x(d.particlePollution) + 5)
-    .attr("y", d => y(d.depressionPrevalence) - 5)
-    .style("font-size", "10px")
-    .style("fill", "red");
+  // svg.selectAll(".text")
+  //   .data(data)
+  //   .enter().append("text")
+  //   .text(d => d.countryName)
+  //   .attr("x", d => x(d.particlePollution) + 5)
+  //   .attr("y", d => y(d.depressionPrevalence) - 5)
+  //   .style("font-size", "10px")
+  //   .style("fill", "red");
 
 
   // add the x and y axis to the svg
@@ -337,7 +352,6 @@ function createScatterPlot(data) {
     .attr("dy", "1em")
     .style("text-anchor", "middle")
     .text("Depression Prevalence");
-
 }
 
 function createStackedBars(data, mainCsvData) {
@@ -405,7 +419,7 @@ function createStackedBars(data, mainCsvData) {
     .attr("transform", "translate(" + (-margin.left / 2) + "," + (height / 2) + ")rotate(-90)")
     .text("Correlation Coefficient")
     .style("font-size", "14px")
-    //.attr("y", 5);
+  //.attr("y", 5);
 
 
 
@@ -593,6 +607,13 @@ function correlationCoefficient(x, y) {
   const denominator = Math.sqrt(d3.sum(x_dev.map(d => d ** 2)) * d3.sum(y_dev.map(d => d ** 2)));
   return numerator / denominator;
 }
+
+// function toggleScatterPlot(){
+d3.selectAll('input[name="toggle"]')
+  .on("change", function () {
+    scatterPlotView = this.value;
+    createScatterPlot(mainCsvData, this.value)
+  });
 
 
 
