@@ -457,7 +457,7 @@ function createStackedBars(data, mainCsvData, sortingOrder) {
     default:
       console.log("sortByDepressionAscending");
       sortByDepressionAscending(mainCsvData);
-      
+
   }
   // mainCsvData.sort(function (a, b) {
   //   return d3.descending(+a.particlePollution, +b.particlePollution);
@@ -538,14 +538,13 @@ function createStackedBars(data, mainCsvData, sortingOrder) {
 
 
 
-  // Create the color scales for depression and pollution based on area and density
+  // Create the color scales for depression and pollution 
   var depressionColor = d3.scaleLinear()
     .domain([d3.min(mainCsvData, d => +d.depressionPrevalence), d3.max(mainCsvData, d => +d.depressionPrevalence)])
     .range(["#D85A88", "#2F121C"]);
   var pollutionColor = d3.scaleLinear()
     .domain([d3.min(mainCsvData, d => +d.particlePollution), d3.max(mainCsvData, d => +d.particlePollution)])
     .range(["#4861AC", "#0C1331"]);
-
 
   //stack the data --> stack per subgroup
   var stackedData = d3.stack().keys(subgroups)(data)
@@ -742,3 +741,6 @@ d3.select("#sortDropdown").on("change", function (d) {
   selectedSortingOrder = selectedOption;
   createStackedBars(stackBarData, mainCsvData, selectedOption);
 });
+
+
+
