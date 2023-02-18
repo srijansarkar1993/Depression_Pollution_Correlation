@@ -2,6 +2,7 @@ var selectedRegion = "All";
 var countrySelectedonMap;
 let map;
 let scatterPlotView = "landarea";
+var selectedSortingOrder = "depressionAscending"
 
 
 //Extracting the PollutionDepression main data
@@ -80,7 +81,7 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
     }
   }).then(data => {
     stackBarData = data;
-    createStackedBars(stackBarData, mainCsvData)
+    createStackedBars(stackBarData, mainCsvData, selectedSortingOrder)
   })
 
   d3.select("#filterRegion").on("change", function (d) {
@@ -98,7 +99,7 @@ d3.csv("data/Depression_Pollution_Data.csv", d => {
       d.correlation = correlation;
     });
     createScatterPlot(mainCsvData, scatterPlotView);
-    createStackedBars(stackBarData, mainCsvData);
+    createStackedBars(stackBarData, mainCsvData, selectedSortingOrder);
 
     map.selectAll("path").style("fill", "#ccc");
     var allCountriesInThisRegion = countryDataforMap
@@ -354,7 +355,116 @@ function createScatterPlot(data, scatterPlotView) {
     .text("Depression Prevalence");
 }
 
-function createStackedBars(data, mainCsvData) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Sort the data based on depression prevalence in ascending order
+function sortByDepressionAscending(data) {
+  data.sort(function (a, b) {
+    return d3.ascending(+a.depressionPrevalence, +b.depressionPrevalence);
+  });
+}
+
+// Sort the data based on depression prevalence in descending order
+function sortByDepressionDescending(data) {
+  data.sort(function (a, b) {
+    return d3.descending(+a.depressionPrevalence, +b.depressionPrevalence);
+  });
+}
+
+// Sort the data based on particle pollution in ascending order
+function sortByPollutionAscending(data) {
+  data.sort(function (a, b) {
+    return d3.ascending(+a.particlePollution, +b.particlePollution);
+  });
+}
+
+// Sort the data based on particle pollution in descending order
+function sortByPollutionDescending(data) {
+  data.sort(function (a, b) {
+    return d3.descending(+a.particlePollution, +b.particlePollution);
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createStackedBars(data, mainCsvData, sortingOrder) {
+  switch (sortingOrder) {
+    case "depressionAscending":
+      console.log("sortByDepressionAscending");
+      sortByDepressionAscending(mainCsvData);
+      break;
+
+    case "depressionDescending":
+      console.log("sortByDepressionDescending");
+      sortByDepressionDescending(mainCsvData);
+      break;
+    case "pollutionAscending":
+      console.log("sortByPollutionAscending");
+      sortByPollutionAscending(mainCsvData);
+      break;
+    case "pollutionDescending":
+      console.log("sortByPollutionDescending");
+      sortByPollutionDescending(mainCsvData);
+      break;
+    default:
+      console.log("sortByDepressionAscending");
+      sortByDepressionAscending(mainCsvData);
+      
+  }
+  // mainCsvData.sort(function (a, b) {
+  //   return d3.descending(+a.particlePollution, +b.particlePollution);
+  // });
+  // console.log(mainCsvData)
+
+
   //filtering the data as per the region selected
   let filteredResult = data.filter(obj1 => {
     return mainCsvData.some(obj2 => obj2.countryName === obj1.countries);
@@ -363,7 +473,7 @@ function createStackedBars(data, mainCsvData) {
   data = filteredResult;
 
   // Set the dimensions and margins of the graph
-  const width = 1000, height = 400;
+  const width = 1400, height = 400;
   const margin = { top: 10, right: 30, bottom: 80, left: 50 };
 
   // Create the SVG container
@@ -379,6 +489,11 @@ function createStackedBars(data, mainCsvData) {
   var subgroups = data.columns.slice(1)
   // List of groups are the countries = value of the first column called countries
   var groups = data.map(d => d.countries);
+
+  // Sort the groups array according to the order of countries in mainCsvdata
+  groups.sort(function (a, b) {
+    return mainCsvData.findIndex(c => c.countryName === a) - mainCsvData.findIndex(c => c.countryName === b);
+  });
 
   // Add X axis
   var x = d3.scaleBand()
@@ -593,11 +708,11 @@ var updateStrokeColor = function (map, country, selectedCountry) {
       return d.properties.ADMIN === country;
     })
     .style("fill", function (d, i) {
-      if (d.properties.ADMIN === selectedCountry){
+      if (d.properties.ADMIN === selectedCountry) {
         console.log(d.properties.ADMIN);
         return "red";
       }
-        
+
       else return "orange"
     });
 };
@@ -621,13 +736,9 @@ d3.selectAll('input[name="toggle"]')
     createScatterPlot(mainCsvData, this.value)
   });
 
-
-
-
-
-
-
-
-
-
-
+d3.select("#sortDropdown").on("change", function (d) {
+  // recover the region that has been chosen
+  selectedOption = d3.select(this).property("value");
+  selectedSortingOrder = selectedOption;
+  createStackedBars(stackBarData, mainCsvData, selectedOption);
+});
