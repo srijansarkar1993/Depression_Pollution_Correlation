@@ -216,7 +216,7 @@ d3.json("data/countries.geojson").then(function (world) {
 
 function createScatterPlot(data, scatterPlotView) {
   var margin = { top: 50, right: 90, bottom: 100, left: 40 },
-    width = 500 - margin.left - margin.right,
+    width = 700 - margin.left - margin.right,
     height = 450 - margin.top - margin.bottom;
 
   var viewMode = "area"; // default view mode is "area"
