@@ -131,8 +131,8 @@ d3.json("data/countries.geojson").then(function (world) {
   // Create the map
   map = d3.select("#mapcontainer")
     .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%");
+    .attr("width", "150%")
+    .attr("height", "150%");
 
   // Draw the countries on the map
   map.selectAll("path")
@@ -150,7 +150,7 @@ d3.json("data/countries.geojson").then(function (world) {
       if (result !== undefined) {
         //to color the selected rgion orange on load
         if (selectedRegion == result.region)
-          return "orange";
+          return "#C96387";
         else return "#ccc";
       } else return "#ccc";
     })
@@ -163,12 +163,12 @@ d3.json("data/countries.geojson").then(function (world) {
   // Add interactivity to the map
   map.selectAll("path")
     .on("mouseover", function () {
-      if (this !== currentSelection && d3.select(this).style("fill") !== "orange" && d3.select(this).style("fill") !== "red") {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "#C96387" && d3.select(this).style("fill") !== "red") {
         d3.select(this).style("fill", "darkgrey");
       }
     })
     .on("mouseout", function () {
-      if (this !== currentSelection && d3.select(this).style("fill") !== "orange" && d3.select(this).style("fill") !== "red") {
+      if (this !== currentSelection && d3.select(this).style("fill") !== "#C96387" && d3.select(this).style("fill") !== "red") {
         d3.select(this).style("fill", "#ccc");
       }
     })
@@ -216,7 +216,7 @@ d3.json("data/countries.geojson").then(function (world) {
 
 
 function createScatterPlot(data, scatterPlotView) {
-  var margin = { top: 50, right: 90, bottom: 100, left: 40 },
+  var margin = { top: 40, right: 90, bottom: 100, left: 100 },
     width = 700 - margin.left - margin.right,
     height = 450 - margin.top - margin.bottom;
 
@@ -531,7 +531,7 @@ function createStackedBars(data, mainCsvData, sortingOrder) {
   // Add y-axis label
   svg.append("text")
     .attr("text-anchor", "middle")
-    .attr("transform", "translate(" + (-margin.left / 2) + "," + (height / 2) + ")rotate(-90)")
+    .attr("transform", "translate(" + (-margin.left / 1.5) + "," + (height / 2) + ")rotate(-90)")
     .text("Correlation Coefficient")
     .style("font-size", "14px")
   //.attr("y", 5);
@@ -578,7 +578,7 @@ function createStackedBars(data, mainCsvData, sortingOrder) {
       .html(htmlText)
       .style("opacity", 1)
       .style("background-color", function (d, i, n) {
-        if (country == countrySelectedonMap) return "orange";
+        if (country == countrySelectedonMap) return "#C96387";
         else return "white";
       })
   }
@@ -712,7 +712,7 @@ var updateStrokeColor = function (map, country, selectedCountry) {
         return "red";
       }
 
-      else return "orange"
+      else return "#C96387"
     });
 };
 
