@@ -8,15 +8,19 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
 		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com"> 
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
 </head>
 
 <body class="body">
-	<!-- <div class="responsive-svg-container" id="form">
+	<!-- <div class="responsive-svg-container" id="form"> HELLO
 		<label for="filter">Select Region</label>
 		<select name="filterRegion" id="filterRegion"></select>
 	</div> -->
 
 	<nav id="navigation" class="navbar navbar-expand-lg">
+		<img src="img/logo.svg" class="logo">
 		<a class="navbar-brand" href="#">MoodForecast </a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
 			aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,12 +35,7 @@
 				<input class = "yearText" id="yearText" type="number" value="2020" min="2010" max="2020" oninput="yearSlider.value=yearText.value" />
 			</li> -->
 				<li class="nav-item">
-					<a class="nav-link" href="#sort">Sort By Region</a>
-					<select name="filterRegion" id="filterRegion"></select>
-				</li>
-
-				<li class="nav-item">
-					<a class="nav-link" href="#infoRow">About This Site</a>
+					<a id="aboutthissite" href="#infoRow">About This Site</a>
 				</li>
 			</ul>
 		</div>
@@ -45,30 +44,47 @@
 
 	<div id="about" class="section">
 		<div class="mycontainer">
-			<div class="row" id="titleRow">
-				<div class="col-md-12">
+			<div id="titlebar">
+				<div id="titlebar-text">
 					<h2>Is the Air We Breathe Linked to Our Mental Health?</h2>
-					<h3>Global Depression Prevalence in relation with Particle Pollution for 2023 </h3>
+				</div>
+				<div id="titlebar-sort">
+					<div id="titlebar-sort-text">
+						<h2>Sort By Region</h2>
+					</div>
+					<div id="filter-region">
+						<select class="custom-select" id="filterRegion"></select>
+					</div>
 				</div>
 			</div>
 			<div class="row" id="visualizationRow">
 				<div class="col-md-6" id="globalMap">
 					<div id="mapcontainer" class="responsive-svg-container"
-						style="position: relative; width: 700px; height: 500px;">
+						style="position: relative; width: 700px; height: 419px;">
 						<div class="loader"></div>
 					</div>
 				</div>
-				<div class="col-md-6" id="scatterPlot">
-					<div>Scatter points sized by </div>
-					<div class="radio-buttons">
-						<div class="radio-button">
-							<input type="radio" id="radio-1" name="toggle" value="landarea" checked>
-							<label for="radio-1">Land Area</label>
-							<input type="radio" id="radio-2" name="toggle" value="population">
-							<label for="radio-2">Population</label>
+				<div class="col-md-6" id="scatterPlot"
+					style="height:380px;">
+					<div id="scatter"></div>
+				</div>
+				<div class="row" id="titleRow">
+					<div id="maptext">
+						<h3>Global Depression Prevalence in relation with Particle Pollution for 2023 </h3>
+					</div>
+					<div id="scatterText">
+						<div id="radio-buttons-text">
+							<h3>Scatter points sized by </h3>
+						</div>
+						<div class="radio-buttons">
+							<div class="radio-button">
+								<input type="radio" id="radio-1" name="toggle" value="landarea" checked>
+								<label for="radio-1"><h3>Land Area</h3></label>
+								<input type="radio" id="radio-2" name="toggle" value="population">
+								<label for="radio-2"><h3>Population</h3></label>
+							</div>
 						</div>
 					</div>
-					<div id="scatter"></div>
 				</div>
 				<div class="col-md-12" id="stackedbar">
 					<div>
@@ -93,7 +109,7 @@
 					<!-- <div class="col-md-12"> -->
 						<!-- <div class="legend"> -->
 							<div class="legend-item">
-								<div class="label-box">pollution</div>
+								<div class="label-box">Pollution</div>
 								<div class="color-box pollution-color"></div>
 							</div>
 							<div class="legend-item">
@@ -105,39 +121,31 @@
 					
 				</div>
 			</div>
+			
+		</div>
+
+		<div id="about-content">
+			<div id="about-text">
+				<h1>About This Site</h1>
+				<h3>Goal:</h3>
+				<p>The information visualization website aims to investigate the relationship between particle pollution and mental depression prevalence across countries worldwide.</p>
+				<h3>Features:</h3>
+				<p>
+					<ul>
+						<li>Interactive global map that allows users to select a world geographic region and filter all the visualizations on the webpage to display data from that region.</li>
+						<li>Scatterplot that compares pollution vs. depression, sized based on population or land area, with a best-fit line calculated using linear regression.</li>
+						<li>Stacked bars that show pollution levels and depression prevalence on a country level, with darker colors indicating higher pollution and a yellow circle displaying the correlation coefficient value.</li>
+					</ul>
+				</p>
+				<h3>Benefits:</h3>
+				<p>By providing users with a range of interactive visualizations, the website enables them to explore and analyze the data in different ways, gain a better understanding of the potential relationship between particle pollution and mental depression, and identify any trends or patterns in the data. The information presented on the website could be valuable for policymakers, researchers, and the public in general, as they seek to better understand and address the impact of air pollution on mental health.
+				</p>
+				<h3>User Interaction:</h3>
+				<p>Users can interact with the website by selecting a world geographic region on the interactive global map, exploring the scatterplot to identify any potential relationships between particle pollution and mental depression, and analyzing the stacked bars to compare the data across different countries. They can also arrange the order of the stack bars based on pollution level or depression level, allowing them to explore the data in different ways and gain a more comprehensive understanding of the potential relationship between particle pollution and mental depression.
+				</p>
+			</div>
 		</div>
 	</div>
-	<div class="row" id="infoRow">
-		<div class="col-md-12">
-			<h2 class="subheading">About This Site</h2>
-			<h3 class="sections"> What is it and who is it for?</h3>
-			<p>The visualization attempts to show the correlation between depression prevalence and particle
-				pollution in air across global countries based on data
-				for 2023. This visualization is targeted to individuals with depression (currently or in past),
-				medical practitioners and researchers,
-				pharmaceutical organisations and also for anyone interested in this topic.</p>
-			<h3 class="sections"> Why is it important?</h3>
-			<p>The relationship between air pollution and mental health is a growing area of concern and could
-				have significant implications for public health.
-				Understanding the relationship between air pollution and depression is important for improving
-				public health, reducing the burden of mental illness, and ultimately improving quality of life
-				for individuals and communities affected by air pollution.</p>
-			<h3 class="sections"> How do you look at it?</h3>
-			<p> There are 2 parts to the visualization.
-				In the first part we can see a global map where the user can interact by clicking on any
-				country.
-				In the second part we have a stacked bar chart view, where the upper bars represent the severity
-				of particle pollution in air and
-				the lower bars represent the severity of depression across the countries within a geographical
-				regions.The position of the red dots (TBD) will help to visualize the
-				correlation between air pollution and depression.
-				Users can select the region to view through the dropdown in the top or by selecting a country in
-				the global map.
-			</p>
-		</div>
-	</div>
-
-
 
 	<script src="https://d3js.org/d3.v7.min.js"></script>
 	<!-- <script src="https://d3js.org/d3-queue.v2.min.js"></script> -->
